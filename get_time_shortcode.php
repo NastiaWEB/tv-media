@@ -1,4 +1,33 @@
 <?php
+
+function is_not_shabbat() {
+
+	$now = time();//strtotime('2024-02-23 09:30'); //time();
+	$before = jet_engine()->listings->data->get_option('shabbat-options::candle-lighting-time');
+	$after = jet_engine()->listings->data->get_option('shabbat-options::dusk-time');
+	$daynum = date("N",$now);
+	if ($daynum == 5) { //Friday, check if it's already sunset minus Before
+		$sunset = date_sun_info($now, 31.77, 35.21)['sunset'];
+		$sunset = $sunset - (intval($before)*60);
+		if ($now>=$sunset) {
+			return 'false';
+		}
+		else return 'true';
+	}
+	else if ($daynum == 6) { //Saturday, check if it's not Sunset plus After
+		$sunset = date_sun_info($now, 31.77, 35.21)['sunset'];
+		$sunset = $sunset + (intval($after)*60);
+		if ($now<=$sunset) {
+			return 'false';
+		}
+		else return 'true';
+	}
+	else {	//not Friday or Saturday, so not Shabbat
+		return 'true';
+	}
+
+}
+
 function get_img_shabbat() {
 	global $post;
 	$current_id   = $post->ID;
